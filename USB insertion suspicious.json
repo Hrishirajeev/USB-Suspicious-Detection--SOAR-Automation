@@ -1,0 +1,2374 @@
+{
+  "name": "USB insertion suspicious",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "usb-alert",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -2368,
+        176
+      ],
+      "id": "bdb4fcef-a89f-4e73-9c7a-231cb3481843",
+      "name": "Webhook",
+      "webhookId": "a2f0eb52-7499-4999-9d50-e2a1450f8f26"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "323a23f6-19da-40b2-85e8-f13d2df16665",
+              "name": "hostname",
+              "value": "={{$json.body.agent.name}}",
+              "type": "string"
+            },
+            {
+              "id": "de75149e-a987-4ebe-b10f-86423b9b502a",
+              "name": "username",
+              "value": "={{$json.body.data.win.system.computer}}",
+              "type": "string"
+            },
+            {
+              "id": "9f55379a-def1-436e-86f7-4bf3265c013b",
+              "name": "serial",
+              "value": "={{$json.body.data.win.uMDFHostDeviceRequest.instanceId.split('REV_')[1].split('#')[1].split('&')[0]}}",
+              "type": "string"
+            },
+            {
+              "id": "2cb9599f-b234-4c8d-89ac-d07c5c0d8155",
+              "name": "event id",
+              "value": "={{$json.body.data.win.system.eventID}}",
+              "type": "string"
+            },
+            {
+              "id": "430dba37-abce-4d22-8600-b0ed68ec4832",
+              "name": "vendor ",
+              "value": "={{$json.body.data.win.uMDFHostDeviceRequest.instanceId.split('VEN_')[1].split('&')[0]}}",
+              "type": "string"
+            },
+            {
+              "id": "2782badd-371c-4da3-a9e6-97d6b575196a",
+              "name": "revision:",
+              "value": "={{$json.body.data.win.uMDFHostDeviceRequest.instanceId.split('REV_')[1].split('#')[0]}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2144,
+        176
+      ],
+      "id": "a98f504e-7c35-4c1c-9c5c-300179683120",
+      "name": "normalization"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "16948774-58d2-450c-a9cc-9579e2365a3c",
+              "leftValue": "={{$json.process_name}}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -1424,
+        592
+      ],
+      "id": "05e96b1b-061b-44df-9b9b-9dbe403466e5",
+      "name": "process exists check"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "76121d99-77f5-4f78-abdf-92d644f96230",
+              "name": "status",
+              "value": "Suspicious USB",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1872,
+        592
+      ],
+      "id": "d52b6900-f3bc-42dc-801b-7b41bfaf3d58",
+      "name": "suspicious check"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "a237d1a2-a5e3-4b76-b80a-b47e1ee202c5",
+              "leftValue": "={{$json.data.attributes.last_analysis_stats.malicious}}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -512,
+        384
+      ],
+      "id": "2b21ea10-db91-428b-99fb-9b1b2c2db907",
+      "name": "hash reputation check"
+    },
+    {
+      "parameters": {
+        "curlImport": "",
+        "httpVariantWarning": "",
+        "method": "GET",
+        "url": "https://www.virustotal.com/api/v3/files/{{$json.hash}}",
+        "": "",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "virusTotalApi",
+        "provideSslCertificates": false,
+        "sendQuery": false,
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-apikey",
+              "value": "9b1544d615300308368df0aea86adba1e89aaa6f3657d8cfc17e052c7935b3f2"
+            }
+          ]
+        },
+        "sendBody": false,
+        "options": {},
+        "infoMessage": ""
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -752,
+        352
+      ],
+      "id": "57fc6590-a364-4f7c-aac0-b1f03ad46146",
+      "name": "VirusTotal HTTP Request",
+      "extendsCredential": "virusTotalApi",
+      "credentials": {
+        "virusTotalApi": {
+          "id": "xH1wiccs6O1bj0ae",
+          "name": "VirusTotal account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "alertFields": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "title": "=Suspicious USB - {{$('normalization').item.json.hostname}}",
+            "description": "=User: {{$('normalization').item.json.username}} \n Serial: {{$('normalization').item.json.serial}} \n Drive: {{$('normalization').item.json.drive}} \n Hash: {{$('normalization').item.json.hash}}",
+            "type": "external",
+            "source": "USB Monitor",
+            "sourceRef": "={{$('normalization').item.json.serial}}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "displayName": "Title",
+              "id": "title",
+              "type": "string",
+              "removed": false,
+              "required": true,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Description",
+              "id": "description",
+              "type": "string",
+              "removed": false,
+              "required": true,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Type",
+              "id": "type",
+              "type": "string",
+              "removed": false,
+              "required": true,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Source",
+              "id": "source",
+              "type": "string",
+              "removed": false,
+              "required": true,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Source Reference",
+              "id": "sourceRef",
+              "type": "string",
+              "removed": false,
+              "required": true,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "External Link",
+              "id": "externalLink",
+              "type": "string",
+              "removed": true,
+              "required": false,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Severity (Severity of information)",
+              "id": "severity",
+              "type": "options",
+              "options": [
+                {
+                  "name": "Low",
+                  "value": 1
+                },
+                {
+                  "name": "Medium",
+                  "value": 2
+                },
+                {
+                  "name": "High",
+                  "value": 3
+                },
+                {
+                  "name": "Critical",
+                  "value": 4
+                }
+              ],
+              "removed": true,
+              "required": false,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Date",
+              "id": "date",
+              "type": "dateTime",
+              "removed": true,
+              "required": false,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Tags",
+              "id": "tags",
+              "type": "string",
+              "removed": true,
+              "required": false,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Follow",
+              "id": "follow",
+              "type": "boolean",
+              "removed": true,
+              "required": false,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Flag",
+              "id": "flag",
+              "type": "boolean",
+              "removed": true,
+              "required": false,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "TLP (Confidentiality of information)",
+              "id": "tlp",
+              "type": "options",
+              "options": [
+                {
+                  "name": "White",
+                  "value": 0
+                },
+                {
+                  "name": "Green",
+                  "value": 1
+                },
+                {
+                  "name": "Amber",
+                  "value": 2
+                },
+                {
+                  "name": "Red",
+                  "value": 3
+                }
+              ],
+              "removed": true,
+              "required": false,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "PAP (Level of exposure of information)",
+              "id": "pap",
+              "type": "options",
+              "options": [
+                {
+                  "name": "White",
+                  "value": 0
+                },
+                {
+                  "name": "Green",
+                  "value": 1
+                },
+                {
+                  "name": "Amber",
+                  "value": 2
+                },
+                {
+                  "name": "Red",
+                  "value": 3
+                }
+              ],
+              "removed": true,
+              "required": false,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Summary",
+              "id": "summary",
+              "type": "string",
+              "removed": true,
+              "required": false,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Status",
+              "id": "status",
+              "type": "options",
+              "removed": true,
+              "required": false,
+              "display": true,
+              "defaultMatch": false,
+              "options": [
+                {
+                  "name": "Duplicate",
+                  "value": "Duplicate",
+                  "description": "Stage: Closed"
+                },
+                {
+                  "name": "FalsePositive",
+                  "value": "FalsePositive",
+                  "description": "Stage: Closed"
+                },
+                {
+                  "name": "Ignored",
+                  "value": "Ignored",
+                  "description": "Stage: Closed"
+                },
+                {
+                  "name": "Imported",
+                  "value": "Imported",
+                  "description": "Stage: Imported"
+                },
+                {
+                  "name": "InProgress",
+                  "value": "InProgress",
+                  "description": "Stage: InProgress"
+                },
+                {
+                  "name": "New",
+                  "value": "New",
+                  "description": "Stage: New"
+                },
+                {
+                  "name": "Pending",
+                  "value": "Pending",
+                  "description": "Stage: InProgress"
+                }
+              ]
+            },
+            {
+              "displayName": "Case Template",
+              "id": "caseTemplate",
+              "type": "options",
+              "removed": true,
+              "required": false,
+              "display": true,
+              "defaultMatch": false,
+              "options": []
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "n8n-nodes-base.theHiveProject",
+      "typeVersion": 1,
+      "position": [
+        -96,
+        256
+      ],
+      "id": "d835bae6-d3f2-44f7-8c72-d5b1eccc08fe",
+      "name": "high alert",
+      "credentials": {
+        "theHiveProjectApi": {
+          "id": "3Vipg3yqVDN6v93r",
+          "name": "The Hive 5 account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "a908c8e9-df2b-4a19-89f7-e14eb93d5d13",
+              "leftValue": "={{$json.serial}}",
+              "rightValue": "ABC123",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -1936,
+        176
+      ],
+      "id": "6cd98d3d-855a-4524-997d-775b5515140f",
+      "name": "usb serial comparison"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "85b43ec9-b5a4-4979-a6fb-ad16c02f7680",
+              "leftValue": "={{$json.data.win.eventdata.parentImage}}",
+              "rightValue": "powershell",
+              "operator": {
+                "type": "array",
+                "operation": "contains",
+                "rightType": "any"
+              }
+            },
+            {
+              "id": "8796f9c6-1e65-43af-9dee-bef84468ec33",
+              "leftValue": "={{$json.data.win.eventdata.image}}",
+              "rightValue": "cmd",
+              "operator": {
+                "type": "array",
+                "operation": "contains",
+                "rightType": "any"
+              }
+            },
+            {
+              "id": "70537a2a-382f-444b-a20d-94dfb327c0b5",
+              "leftValue": "={{$json.data.win.eventdata.targetObject}}",
+              "rightValue": "CurrentVersion\\Run",
+              "operator": {
+                "type": "array",
+                "operation": "contains",
+                "rightType": "any"
+              }
+            },
+            {
+              "id": "da00fdfb-dddb-465a-a1d0-4f6cb069c7b3",
+              "leftValue": "={{$json.data.win.eventdata.destinationIp}}",
+              "rightValue": "",
+              "operator": {
+                "type": "array",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -320,
+        272
+      ],
+      "id": "75932782-5126-45aa-ac9f-dbdc47732d00",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "command": "=taskkill /F /IM {{$('normalization').item.json.process_name}}",
+        "cwd": "\\"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        112,
+        256
+      ],
+      "id": "1acdaed6-852e-4485-8a0b-e3687ae445a9",
+      "name": "kill process",
+      "credentials": {
+        "sshPassword": {
+          "id": "dVY92IoonPk2TPJT",
+          "name": "SSH Password account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "move \"{{$('normalization').item.json.drive}}\\{{$('normalization').item.json.process_name}}\" \"C:\\Quarantine\\\""
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        512,
+        256
+      ],
+      "id": "653fc150-3126-4560-9177-fe7a657d62cf",
+      "name": "quarentine file",
+      "credentials": {
+        "sshPassword": {
+          "id": "dVY92IoonPk2TPJT",
+          "name": "SSH Password account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "=netsh advfirewall set allprofiles firewallpolicy blockinbound,blockoutbound"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        304,
+        256
+      ],
+      "id": "58bbf6da-3c31-4dde-b602-025cc1485dde",
+      "name": "isolate endpoint",
+      "credentials": {
+        "sshPassword": {
+          "id": "dVY92IoonPk2TPJT",
+          "name": "SSH Password account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "=net user {{$('normalization').item.json.username}} /active:no"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        704,
+        256
+      ],
+      "id": "7b31f1ad-a798-4d02-bf5c-aeafaa9561ac",
+      "name": "lock user",
+      "credentials": {
+        "sshPassword": {
+          "id": "dVY92IoonPk2TPJT",
+          "name": "SSH Password account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "hrishihrishirajeev24@gmail.com",
+        "toEmail": "hrishirajeev24@gmail.com",
+        "subject": "=🚨 CRITICAL - USB Malware Detected on {{$('normalization').item.json.hostname}}",
+        "html": "=CRITICAL ALERT - USB Malware Detected!\n\nHostname: {{$('normalization').item.json.hostname}}\nUser: {{$('normalization').item.json.username}}\nSerial: {{$('normalization').item.json.serial}}\nDrive: {{$('normalization').item.json.drive}}\nHash: {{$('normalization').item.json.hash}}\n\nActions Taken:\n- Process Killed ✅\n- Endpoint Isolated ✅\n- File Quarantined ✅\n- User Locked ✅",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        912,
+        256
+      ],
+      "id": "e4c0a91b-963a-4e7c-a574-96feaa16f992",
+      "name": "notify team",
+      "webhookId": "ddd5293e-3c4f-4d4a-88b4-52a3e6344b10",
+      "credentials": {
+        "smtp": {
+          "id": "pjxMZMyHDRTUvuxp",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "512004fa-aa84-4804-9c7f-c229c4a57c32",
+              "name": "Monitor Only",
+              "value": "Approved USB- Monitor Only",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1696,
+        160
+      ],
+      "id": "2aaca78c-b43d-499c-a7ab-030585b46fb7",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "alertFields": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "title": "=Approved USB Inserted - {{$('normalization').item.json.hostname}}",
+            "description": "=User: {{$('normalization').item.json.username}} \n Serial: {{$('normalization').item.json.serial}} \n Drive: {{$('normalization').item.json.drive}}",
+            "type": "external",
+            "source": "USB Monitor",
+            "sourceRef": "={{$('normalization').item.json.serial}}",
+            "severity": 1
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "displayName": "Title",
+              "id": "title",
+              "type": "string",
+              "removed": false,
+              "required": true,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Description",
+              "id": "description",
+              "type": "string",
+              "removed": false,
+              "required": true,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Type",
+              "id": "type",
+              "type": "string",
+              "removed": false,
+              "required": true,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Source",
+              "id": "source",
+              "type": "string",
+              "removed": false,
+              "required": true,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Source Reference",
+              "id": "sourceRef",
+              "type": "string",
+              "removed": false,
+              "required": true,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "External Link",
+              "id": "externalLink",
+              "type": "string",
+              "removed": true,
+              "required": false,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Severity (Severity of information)",
+              "id": "severity",
+              "type": "options",
+              "options": [
+                {
+                  "name": "Low",
+                  "value": 1
+                },
+                {
+                  "name": "Medium",
+                  "value": 2
+                },
+                {
+                  "name": "High",
+                  "value": 3
+                },
+                {
+                  "name": "Critical",
+                  "value": 4
+                }
+              ],
+              "removed": false,
+              "required": false,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Date",
+              "id": "date",
+              "type": "dateTime",
+              "removed": true,
+              "required": false,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Tags",
+              "id": "tags",
+              "type": "string",
+              "removed": true,
+              "required": false,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Follow",
+              "id": "follow",
+              "type": "boolean",
+              "removed": true,
+              "required": false,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Flag",
+              "id": "flag",
+              "type": "boolean",
+              "removed": true,
+              "required": false,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "TLP (Confidentiality of information)",
+              "id": "tlp",
+              "type": "options",
+              "options": [
+                {
+                  "name": "White",
+                  "value": 0
+                },
+                {
+                  "name": "Green",
+                  "value": 1
+                },
+                {
+                  "name": "Amber",
+                  "value": 2
+                },
+                {
+                  "name": "Red",
+                  "value": 3
+                }
+              ],
+              "removed": true,
+              "required": false,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "PAP (Level of exposure of information)",
+              "id": "pap",
+              "type": "options",
+              "options": [
+                {
+                  "name": "White",
+                  "value": 0
+                },
+                {
+                  "name": "Green",
+                  "value": 1
+                },
+                {
+                  "name": "Amber",
+                  "value": 2
+                },
+                {
+                  "name": "Red",
+                  "value": 3
+                }
+              ],
+              "removed": true,
+              "required": false,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Summary",
+              "id": "summary",
+              "type": "string",
+              "removed": true,
+              "required": false,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Status",
+              "id": "status",
+              "type": "options",
+              "removed": true,
+              "required": false,
+              "display": true,
+              "defaultMatch": false,
+              "options": [
+                {
+                  "name": "Duplicate",
+                  "value": "Duplicate",
+                  "description": "Stage: Closed"
+                },
+                {
+                  "name": "FalsePositive",
+                  "value": "FalsePositive",
+                  "description": "Stage: Closed"
+                },
+                {
+                  "name": "Ignored",
+                  "value": "Ignored",
+                  "description": "Stage: Closed"
+                },
+                {
+                  "name": "Imported",
+                  "value": "Imported",
+                  "description": "Stage: Imported"
+                },
+                {
+                  "name": "InProgress",
+                  "value": "InProgress",
+                  "description": "Stage: InProgress"
+                },
+                {
+                  "name": "New",
+                  "value": "New",
+                  "description": "Stage: New"
+                },
+                {
+                  "name": "Pending",
+                  "value": "Pending",
+                  "description": "Stage: InProgress"
+                }
+              ]
+            },
+            {
+              "displayName": "Case Template",
+              "id": "caseTemplate",
+              "type": "options",
+              "removed": true,
+              "required": false,
+              "display": true,
+              "defaultMatch": false,
+              "options": []
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "n8n-nodes-base.theHiveProject",
+      "typeVersion": 1,
+      "position": [
+        -1488,
+        160
+      ],
+      "id": "a2a9cfbe-c84b-4090-85b8-525b93e37b04",
+      "name": "monitor alert",
+      "credentials": {
+        "theHiveProjectApi": {
+          "id": "3Vipg3yqVDN6v93r",
+          "name": "The Hive 5 account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 2
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -1648,
+        592
+      ],
+      "id": "c4ba55bf-5420-4ed6-aae9-c5f6ed2f5fa3",
+      "name": "Wait",
+      "webhookId": "f16b5469-1a1b-4245-a81e-371bcf75e58b"
+    },
+    {
+      "parameters": {
+        "curlImport": "",
+        "httpVariantWarning": "",
+        "method": "GET",
+        "url": "=https://www.virustotal.com/api/v3/files/{{$json.stdout}}",
+        "": "",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "virusTotalApi",
+        "provideSslCertificates": false,
+        "sendQuery": false,
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-apikey",
+              "value": "9b1544d615300308368df0aea86adba1e89aaa6f3657d8cfc17e052c7935b3f2"
+            }
+          ]
+        },
+        "sendBody": false,
+        "options": {},
+        "infoMessage": ""
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        32,
+        752
+      ],
+      "id": "a3183516-1d6f-4223-8c9a-fd1d391fa40e",
+      "name": "VirusTotal HTTP Request1",
+      "extendsCredential": "virusTotalApi",
+      "credentials": {
+        "virusTotalApi": {
+          "id": "xH1wiccs6O1bj0ae",
+          "name": "VirusTotal account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "case",
+        "caseFields": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "flag": false,
+            "title": "=Malware Detected on {{$('normalization').item.json.hostname}}",
+            "description": "=Malicious file detected via automated workflow.\n\nHostname: {{$('normalization').item.json.hostname}}\nSerial: {{$('normalization').item.json.serial}}\n\nSHA256:\n{{$('generate hash for each file').item.json.stdout.trim()}}\n\nVirusTotal Results:\nMalicious: {{$json[\"Malicious Count\"]}}\nSuspicious: {{$json[\"Suspicious Count\"]}}\nUndetected: {{$json[\"Undetected Count\"]}}\n\nDetection Threshold: >0 malicious engines",
+            "severity": 2,
+            "status": "TruePositive",
+            "tlp": 2,
+            "pap": 2
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "displayName": "Title",
+              "id": "title",
+              "type": "string",
+              "removed": false,
+              "required": true,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Description",
+              "id": "description",
+              "type": "string",
+              "removed": false,
+              "required": true,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Severity (Severity of information)",
+              "id": "severity",
+              "type": "options",
+              "options": [
+                {
+                  "name": "Low",
+                  "value": 1
+                },
+                {
+                  "name": "Medium",
+                  "value": 2
+                },
+                {
+                  "name": "High",
+                  "value": 3
+                },
+                {
+                  "name": "Critical",
+                  "value": 4
+                }
+              ],
+              "removed": false,
+              "required": false,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Start Date",
+              "id": "startDate",
+              "type": "dateTime",
+              "removed": false,
+              "required": false,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "End Date",
+              "id": "endDate",
+              "type": "dateTime",
+              "removed": false,
+              "required": false,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Tags",
+              "id": "tags",
+              "type": "string",
+              "removed": false,
+              "required": false,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Flag",
+              "id": "flag",
+              "type": "boolean",
+              "removed": false,
+              "required": false,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "TLP (Confidentiality of information)",
+              "id": "tlp",
+              "type": "options",
+              "options": [
+                {
+                  "name": "White",
+                  "value": 0
+                },
+                {
+                  "name": "Green",
+                  "value": 1
+                },
+                {
+                  "name": "Amber",
+                  "value": 2
+                },
+                {
+                  "name": "Red",
+                  "value": 3
+                }
+              ],
+              "removed": false,
+              "required": false,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "PAP (Level of exposure of information)",
+              "id": "pap",
+              "type": "options",
+              "options": [
+                {
+                  "name": "White",
+                  "value": 0
+                },
+                {
+                  "name": "Green",
+                  "value": 1
+                },
+                {
+                  "name": "Amber",
+                  "value": 2
+                },
+                {
+                  "name": "Red",
+                  "value": 3
+                }
+              ],
+              "removed": false,
+              "required": false,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Summary",
+              "id": "summary",
+              "type": "string",
+              "removed": false,
+              "required": false,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Status",
+              "id": "status",
+              "type": "options",
+              "removed": false,
+              "required": false,
+              "display": true,
+              "defaultMatch": false,
+              "options": [
+                {
+                  "name": "Duplicated",
+                  "value": "Duplicated",
+                  "description": "Stage: Closed"
+                },
+                {
+                  "name": "FalsePositive",
+                  "value": "FalsePositive",
+                  "description": "Stage: Closed"
+                },
+                {
+                  "name": "Indeterminate",
+                  "value": "Indeterminate",
+                  "description": "Stage: Closed"
+                },
+                {
+                  "name": "InProgress",
+                  "value": "InProgress",
+                  "description": "Stage: InProgress"
+                },
+                {
+                  "name": "New",
+                  "value": "New",
+                  "description": "Stage: New"
+                },
+                {
+                  "name": "Other",
+                  "value": "Other",
+                  "description": "Stage: Closed"
+                },
+                {
+                  "name": "TruePositive",
+                  "value": "TruePositive",
+                  "description": "Stage: Closed"
+                }
+              ]
+            },
+            {
+              "displayName": "Assignee",
+              "id": "assignee",
+              "type": "options",
+              "removed": false,
+              "required": false,
+              "display": true,
+              "defaultMatch": false,
+              "options": [
+                {
+                  "name": "soar",
+                  "value": "soc-analyst@hive.com"
+                }
+              ]
+            },
+            {
+              "displayName": "Case Template",
+              "id": "caseTemplate",
+              "type": "options",
+              "removed": true,
+              "required": false,
+              "display": true,
+              "defaultMatch": false,
+              "options": []
+            },
+            {
+              "displayName": "Tasks",
+              "id": "tasks",
+              "type": "array",
+              "removed": true,
+              "required": false,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Sharing Parameters",
+              "id": "sharingParameters",
+              "type": "array",
+              "removed": true,
+              "required": false,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Observable Rule",
+              "id": "observableRule",
+              "type": "string",
+              "removed": false,
+              "required": false,
+              "display": true,
+              "defaultMatch": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "n8n-nodes-base.theHiveProject",
+      "typeVersion": 1,
+      "position": [
+        704,
+        752
+      ],
+      "id": "597da782-290d-4fd2-904d-ef8a47ac5b5f",
+      "name": "Create a case",
+      "credentials": {
+        "theHiveProjectApi": {
+          "id": "3Vipg3yqVDN6v93r",
+          "name": "The Hive 5 account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        -1184,
+        240
+      ],
+      "id": "a1951abc-b471-4bdd-8bcd-2c31b3262e5a",
+      "name": "active running detected",
+      "credentials": {
+        "sshPassword": {
+          "id": "dVY92IoonPk2TPJT",
+          "name": "SSH Password account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "cmd /c \"dir E:\\*.zip\"",
+        "cwd": "C:\\Windows\\System32"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        -1152,
+        752
+      ],
+      "id": "d9a96901-18d8-48ca-8e83-a0e066e7682f",
+      "name": "list executables on usb",
+      "alwaysOutputData": false,
+      "credentials": {
+        "sshPassword": {
+          "id": "Ge4MXocVk7M994jq",
+          "name": "SSH Password account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "alertFields": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "title": "=Medium Risk USB - {{$('normalization').item.json.hostname}}",
+            "description": "=User: {{$('normalization').item.json.username}} \n Serial: {{$('normalization').item.json.serial}} \n Hash: {{$('normalization').item.json.hash}} \n No malicious indicators found",
+            "type": "external",
+            "sourceRef": "{{$('normalization').item.json.serial}}",
+            "source": "USB Monitor",
+            "tlp": 1
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "displayName": "Title",
+              "id": "title",
+              "type": "string",
+              "removed": false,
+              "required": true,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Description",
+              "id": "description",
+              "type": "string",
+              "removed": false,
+              "required": true,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Type",
+              "id": "type",
+              "type": "string",
+              "removed": false,
+              "required": true,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Source",
+              "id": "source",
+              "type": "string",
+              "removed": false,
+              "required": true,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Source Reference",
+              "id": "sourceRef",
+              "type": "string",
+              "removed": false,
+              "required": true,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "External Link",
+              "id": "externalLink",
+              "type": "string",
+              "removed": true,
+              "required": false,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Severity (Severity of information)",
+              "id": "severity",
+              "type": "options",
+              "options": [
+                {
+                  "name": "Low",
+                  "value": 1
+                },
+                {
+                  "name": "Medium",
+                  "value": 2
+                },
+                {
+                  "name": "High",
+                  "value": 3
+                },
+                {
+                  "name": "Critical",
+                  "value": 4
+                }
+              ],
+              "removed": true,
+              "required": false,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Date",
+              "id": "date",
+              "type": "dateTime",
+              "removed": true,
+              "required": false,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Tags",
+              "id": "tags",
+              "type": "string",
+              "removed": true,
+              "required": false,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Follow",
+              "id": "follow",
+              "type": "boolean",
+              "removed": true,
+              "required": false,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Flag",
+              "id": "flag",
+              "type": "boolean",
+              "removed": true,
+              "required": false,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "TLP (Confidentiality of information)",
+              "id": "tlp",
+              "type": "options",
+              "options": [
+                {
+                  "name": "White",
+                  "value": 0
+                },
+                {
+                  "name": "Green",
+                  "value": 1
+                },
+                {
+                  "name": "Amber",
+                  "value": 2
+                },
+                {
+                  "name": "Red",
+                  "value": 3
+                }
+              ],
+              "removed": false,
+              "required": false,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "PAP (Level of exposure of information)",
+              "id": "pap",
+              "type": "options",
+              "options": [
+                {
+                  "name": "White",
+                  "value": 0
+                },
+                {
+                  "name": "Green",
+                  "value": 1
+                },
+                {
+                  "name": "Amber",
+                  "value": 2
+                },
+                {
+                  "name": "Red",
+                  "value": 3
+                }
+              ],
+              "removed": true,
+              "required": false,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Summary",
+              "id": "summary",
+              "type": "string",
+              "removed": true,
+              "required": false,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Status",
+              "id": "status",
+              "type": "options",
+              "removed": true,
+              "required": false,
+              "display": true,
+              "defaultMatch": false,
+              "options": [
+                {
+                  "name": "Duplicate",
+                  "value": "Duplicate",
+                  "description": "Stage: Closed"
+                },
+                {
+                  "name": "FalsePositive",
+                  "value": "FalsePositive",
+                  "description": "Stage: Closed"
+                },
+                {
+                  "name": "Ignored",
+                  "value": "Ignored",
+                  "description": "Stage: Closed"
+                },
+                {
+                  "name": "Imported",
+                  "value": "Imported",
+                  "description": "Stage: Imported"
+                },
+                {
+                  "name": "InProgress",
+                  "value": "InProgress",
+                  "description": "Stage: InProgress"
+                },
+                {
+                  "name": "New",
+                  "value": "New",
+                  "description": "Stage: New"
+                },
+                {
+                  "name": "Pending",
+                  "value": "Pending",
+                  "description": "Stage: InProgress"
+                }
+              ]
+            },
+            {
+              "displayName": "Case Template",
+              "id": "caseTemplate",
+              "type": "options",
+              "removed": true,
+              "required": false,
+              "display": true,
+              "defaultMatch": false,
+              "options": []
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "n8n-nodes-base.theHiveProject",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        528
+      ],
+      "id": "6b540a38-78f0-4e66-94df-f05f1df4944f",
+      "name": "medium alert",
+      "credentials": {
+        "theHiveProjectApi": {
+          "id": "3Vipg3yqVDN6v93r",
+          "name": "The Hive 5 account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0d2750ac-f03f-45f9-b463-c1c2af2920b7",
+              "name": "hash",
+              "value": "={{$json.stdout.trim()}}",
+              "type": "string"
+            },
+            {
+              "id": "42ff1efb-fcee-44ea-97b1-48a150da4695",
+              "name": "process_name",
+              "value": "={{$json.stdout.trim()}}",
+              "type": "string"
+            },
+            {
+              "id": "984891f4-24fd-4ead-b2ec-b2b77ed0e0da",
+              "name": "full_path",
+              "value": "={{$json.stdout.trim()}}",
+              "type": "string"
+            },
+            {
+              "id": "39501bdb-89c2-4ecd-a58a-43670817c5d2",
+              "name": "parent_process",
+              "value": "{{$json.stdout.trim()}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -976,
+        320
+      ],
+      "id": "a5bf02d5-7732-4d39-848c-789cb03052e4",
+      "name": "extract details"
+    },
+    {
+      "parameters": {
+        "command": "=& \"C:\\Program Files\\7-Zip\\7z.exe\" x \"{{$json.zip_path}}\" -oE:\\temp -pinfected -y",
+        "cwd": "C:\\Windows\\System32"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        -672,
+        752
+      ],
+      "id": "2b208b7e-bc79-47ec-8f83-64ae4fd0f6f4",
+      "name": "generate hash for each file",
+      "credentials": {
+        "sshPassword": {
+          "id": "Ge4MXocVk7M994jq",
+          "name": "SSH Password account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const output = $input.first().json.stdout;\n\nconst match = output.match(/([A-Fa-f0-9]{64}\\.zip)/);\n\nif (!match) {\n  return [];\n}\n\nreturn [{\n  json: {\n    zip_path: \"E:\\\\\" + match[1]\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -896,
+        752
+      ],
+      "id": "f7e723cf-d09f-490c-92bc-99760a393485",
+      "name": "extarct th zip file > hash"
+    },
+    {
+      "parameters": {
+        "command": "cmd /c \"dir /b E:\\temp\"",
+        "cwd": "C:\\Windows\\System32"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        -432,
+        752
+      ],
+      "id": "3976ac31-de95-4085-85d6-e72acedad253",
+      "name": "List Extracted File",
+      "credentials": {
+        "sshPassword": {
+          "id": "Ge4MXocVk7M994jq",
+          "name": "SSH Password account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "(Get-FileHash \"E:\\temp\\299f253ef5a0f06b347cdfeab309c849cf7951a227ed4c13efb61ddf48c1c8e5.exe\" -Algorithm SHA256).Hash",
+        "cwd": "C:\\Windows\\System32"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        -208,
+        752
+      ],
+      "id": "66c852ea-f2f5-4d4f-9978-e5d8b192ac70",
+      "name": "Generate SHA256 Hash",
+      "credentials": {
+        "sshPassword": {
+          "id": "Ge4MXocVk7M994jq",
+          "name": "SSH Password account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a6e36a6e-3df8-4a5a-af8f-9fad82f5db46",
+              "name": "=Malicious Count",
+              "value": "={{$json.data.attributes.last_analysis_stats.malicious}}",
+              "type": "string"
+            },
+            {
+              "id": "5127e5f6-f3c5-4e12-9d47-ea0f18936593",
+              "name": "Suspicious Count",
+              "value": "={{$json.data.attributes.last_analysis_stats.suspicious}}",
+              "type": "string"
+            },
+            {
+              "id": "b6a4ddec-30e8-4e1b-ac80-d1b8016eb3b9",
+              "name": "Undetected Count",
+              "value": "={{$json.data.attributes.last_analysis_stats.undetected}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        272,
+        752
+      ],
+      "id": "ebd7736d-f62e-4c02-8cfd-34d0f18dd58c",
+      "name": "Clean Summary of virus total"
+    },
+    {
+      "parameters": {
+        "alertFields": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "title": "Suspicious USB",
+            "description": "Malicious file detecetd within USB!! -- when inserted!!",
+            "type": "external",
+            "source": "USB Monitor",
+            "tlp": 2,
+            "severity": 2,
+            "sourceRef": "=Problem in node ‘Create an alert‘\nBad request - please check your parameters"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "displayName": "Title",
+              "id": "title",
+              "type": "string",
+              "removed": false,
+              "required": true,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Description",
+              "id": "description",
+              "type": "string",
+              "removed": false,
+              "required": true,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Type",
+              "id": "type",
+              "type": "string",
+              "removed": false,
+              "required": true,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Source",
+              "id": "source",
+              "type": "string",
+              "removed": false,
+              "required": true,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Source Reference",
+              "id": "sourceRef",
+              "type": "string",
+              "removed": false,
+              "required": true,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "External Link",
+              "id": "externalLink",
+              "type": "string",
+              "removed": true,
+              "required": false,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Severity (Severity of information)",
+              "id": "severity",
+              "type": "options",
+              "options": [
+                {
+                  "name": "Low",
+                  "value": 1
+                },
+                {
+                  "name": "Medium",
+                  "value": 2
+                },
+                {
+                  "name": "High",
+                  "value": 3
+                },
+                {
+                  "name": "Critical",
+                  "value": 4
+                }
+              ],
+              "removed": false,
+              "required": false,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Date",
+              "id": "date",
+              "type": "dateTime",
+              "removed": true,
+              "required": false,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Tags",
+              "id": "tags",
+              "type": "string",
+              "removed": true,
+              "required": false,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Follow",
+              "id": "follow",
+              "type": "boolean",
+              "removed": true,
+              "required": false,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Flag",
+              "id": "flag",
+              "type": "boolean",
+              "removed": true,
+              "required": false,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "TLP (Confidentiality of information)",
+              "id": "tlp",
+              "type": "options",
+              "options": [
+                {
+                  "name": "White",
+                  "value": 0
+                },
+                {
+                  "name": "Green",
+                  "value": 1
+                },
+                {
+                  "name": "Amber",
+                  "value": 2
+                },
+                {
+                  "name": "Red",
+                  "value": 3
+                }
+              ],
+              "removed": false,
+              "required": false,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "PAP (Level of exposure of information)",
+              "id": "pap",
+              "type": "options",
+              "options": [
+                {
+                  "name": "White",
+                  "value": 0
+                },
+                {
+                  "name": "Green",
+                  "value": 1
+                },
+                {
+                  "name": "Amber",
+                  "value": 2
+                },
+                {
+                  "name": "Red",
+                  "value": 3
+                }
+              ],
+              "removed": true,
+              "required": false,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Summary",
+              "id": "summary",
+              "type": "string",
+              "removed": true,
+              "required": false,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Status",
+              "id": "status",
+              "type": "options",
+              "removed": true,
+              "required": false,
+              "display": true,
+              "defaultMatch": false,
+              "options": [
+                {
+                  "name": "Duplicate",
+                  "value": "Duplicate",
+                  "description": "Stage: Closed"
+                },
+                {
+                  "name": "FalsePositive",
+                  "value": "FalsePositive",
+                  "description": "Stage: Closed"
+                },
+                {
+                  "name": "Ignored",
+                  "value": "Ignored",
+                  "description": "Stage: Closed"
+                },
+                {
+                  "name": "Imported",
+                  "value": "Imported",
+                  "description": "Stage: Imported"
+                },
+                {
+                  "name": "InProgress",
+                  "value": "InProgress",
+                  "description": "Stage: InProgress"
+                },
+                {
+                  "name": "New",
+                  "value": "New",
+                  "description": "Stage: New"
+                },
+                {
+                  "name": "Pending",
+                  "value": "Pending",
+                  "description": "Stage: InProgress"
+                }
+              ]
+            },
+            {
+              "displayName": "Case Template",
+              "id": "caseTemplate",
+              "type": "options",
+              "removed": true,
+              "required": false,
+              "display": true,
+              "defaultMatch": false,
+              "options": []
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "n8n-nodes-base.theHiveProject",
+      "typeVersion": 1,
+      "position": [
+        480,
+        752
+      ],
+      "id": "58378e47-6ebe-4108-9c09-8ed7133810e5",
+      "name": "Create an alert",
+      "credentials": {
+        "theHiveProjectApi": {
+          "id": "3Vipg3yqVDN6v93r",
+          "name": "The Hive 5 account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "hrishihrishirajeev24@gmail.com",
+        "toEmail": "hrishirajeev24@gmail.com",
+        "subject": "=🚨 CRITICAL - USB Malware Detected on {{$('normalization').item.json.hostname}}",
+        "html": "=CRITICAL ALERT - USB Malware Detected!\n\nHostname: {{$('normalization').item.json.hostname}}\nUser: {{$('normalization').item.json.username}}\nSerial: {{$('normalization').item.json.serial}}\nDrive: {{$('normalization').item.json.drive}}\nHash: {{$('normalization').item.json.hash}}\n- ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        912,
+        752
+      ],
+      "id": "73061e94-a78c-42eb-9c1b-eb6ecbbb7b71",
+      "name": "notify team1",
+      "webhookId": "ddd5293e-3c4f-4d4a-88b4-52a3e6344b10",
+      "credentials": {
+        "smtp": {
+          "id": "pjxMZMyHDRTUvuxp",
+          "name": "SMTP account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "normalization",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "normalization": {
+      "main": [
+        [
+          {
+            "node": "usb serial comparison",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "process exists check": {
+      "main": [
+        [
+          {
+            "node": "active running detected",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "list executables on usb",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "suspicious check": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "hash reputation check": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "medium alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "VirusTotal HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "hash reputation check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "high alert": {
+      "main": [
+        [
+          {
+            "node": "kill process",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "usb serial comparison": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "suspicious check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "high alert",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "kill process": {
+      "main": [
+        [
+          {
+            "node": "isolate endpoint",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "isolate endpoint": {
+      "main": [
+        [
+          {
+            "node": "quarentine file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "quarentine file": {
+      "main": [
+        [
+          {
+            "node": "lock user",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "lock user": {
+      "main": [
+        [
+          {
+            "node": "notify team",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "monitor alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "process exists check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "VirusTotal HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Clean Summary of virus total",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a case": {
+      "main": [
+        [
+          {
+            "node": "notify team1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "active running detected": {
+      "main": [
+        [
+          {
+            "node": "extract details",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "list executables on usb": {
+      "main": [
+        [
+          {
+            "node": "extarct th zip file > hash",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "extract details": {
+      "main": [
+        [
+          {
+            "node": "VirusTotal HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "generate hash for each file": {
+      "main": [
+        [
+          {
+            "node": "List Extracted File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "extarct th zip file > hash": {
+      "main": [
+        [
+          {
+            "node": "generate hash for each file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List Extracted File": {
+      "main": [
+        [
+          {
+            "node": "Generate SHA256 Hash",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate SHA256 Hash": {
+      "main": [
+        [
+          {
+            "node": "VirusTotal HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clean Summary of virus total": {
+      "main": [
+        [
+          {
+            "node": "Create an alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an alert": {
+      "main": [
+        [
+          {
+            "node": "Create a case",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "74f3e513-82dd-4710-b352-a638ad4277ae",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5b816a69221d6fba541ed9937c54e3e4e93a195222706d04b9b427cb2f8616c0"
+  },
+  "id": "kbaAAR2LgWuBLFHn",
+  "tags": []
+}
